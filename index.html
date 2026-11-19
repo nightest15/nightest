@@ -144,9 +144,6 @@ if(!uid){
   localStorage.setItem('tb_uid', uid);
 }
 
-// Стандартний Gemini API ключ
-var DEFAULT_GEMINI_KEY = 'AQ.Ab8RN6I0WTfXxAr5NODSU69gaXokaoPqYdyC4lv9f3itmoe9QQ';
-
 // Глобальний стан застосунку
 var profile = null;
 var tests = [];
@@ -1078,7 +1075,7 @@ function renderEditor(){
 }
 
 function renderAiModal(){
-  var savedKey = localStorage.getItem('tb_gemini_key') || DEFAULT_GEMINI_KEY;
+  var savedKey = localStorage.getItem('tb_gemini_key') || '';
   return '<div class="card" style="border:2px solid var(--accent)">' +
     '<div class="row between">' +
       '<h2>✨ ШІ-помічник генерації тестів</h2>' +
@@ -1089,12 +1086,10 @@ function renderAiModal(){
       '<label class="f" for="aiPromptInp">Завдання для ШІ</label>' +
       '<textarea id="aiPromptInp" placeholder="Наприклад: Будова клітини, 6 клас, 5 питань з поясненнями..."></textarea>' +
     '</div>' +
-    '<details style="margin-top:10px">' +
-      '<summary class="muted" style="cursor:pointer;font-size:.85rem">Налаштування Gemini API ключа</summary>' +
-      '<div style="margin-top:8px">' +
-        '<input id="aiKeyInp" type="text" value="' + esc(savedKey) + '" placeholder="Вставте Gemini API Key">' +
-      '</div>' +
-    '</details>' +
+    '<div style="margin-top:12px">' +
+      '<label class="f" for="aiKeyInp">Ключ Gemini API (потрібен на GitHub Pages, якщо не задано в середовищі)</label>' +
+      '<input id="aiKeyInp" type="password" placeholder="Вставте ключ AIza... (збережеться лише у вашому браузері)" value="' + esc(savedKey) + '">' +
+    '</div>' +
     '<div class="row" style="margin-top:14px">' +
       '<button class="btn primary" data-a="runAiGen">✨ Згенерувати тест</button>' +
       '<button class="btn" data-a="closeAiModal">Скасувати</button>' +
@@ -1531,16 +1526,18 @@ app.addEventListener('click', function(e){
     var promptInp = document.getElementById('aiPromptInp');
     var keyInp = document.getElementById('aiKeyInp');
     var promptText = promptInp ? promptInp.value.trim() : '';
-    var apiKey = keyInp && keyInp.value.trim()
-      ? keyInp.value.trim()
-      : (localStorage.getItem('tb_gemini_key') || DEFAULT_GEMINI_KEY);
+    var enteredKey = keyInp ? keyInp.value.trim() : '';
+    if(enteredKey){
+      localStorage.setItem('tb_gemini_key', enteredKey);
+    } else if(keyInp){
+      localStorage.removeItem('tb_gemini_key');
+    }
+    var apiKey = enteredKey || (localStorage.getItem('tb_gemini_key') || '');
 
     if(!promptText){
       showMsg('Будь ласка, введіть тему тесту для генерації.', true);
       return;
     }
-
-    localStorage.setItem('tb_gemini_key', apiKey);
 
     var genBtn = el;
     var origBtnText = genBtn ? genBtn.textContent : '';
@@ -1551,7 +1548,7 @@ app.addEventListener('click', function(e){
 
     showMsg('🤖 ШІ створює унікальні запитання, зачекайте кілька секунд...');
 
-    var models = ['gemini-3.8-flash', 'gemini-3-flash-preview'];
+    var models = ['gemini-3-flash-preview'];
     var sysPrompt = 'Ти досвідчений український вчитель-методист. Створи якісний, грамотний і цікавий тест українською мовою на задану тему. ' +
       'Якщо кількість питань не вказана, зроби 5 різноманітних питань. ' +
       'Поверни ВИКЛЮЧНО чистий валідний JSON-об\'єкт без markdown-обгорток та пояснень зовні.\n' +
