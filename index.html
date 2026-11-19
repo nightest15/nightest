@@ -117,6 +117,7 @@ input:focus-visible,textarea:focus-visible,select:focus-visible,button:focus-vis
 </div>
 
 <script>
+// Керування світлою та темною темою оформлення
 var savedTheme = localStorage.getItem('tb_theme') || '';
 if(savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
 function updateThemeBtn(){
@@ -136,12 +137,17 @@ document.getElementById('themeBtn').addEventListener('click', function(){
   updateThemeBtn();
 });
 
+// Унікальний ідентифікатор користувача для прив'язки створених тестів
 var uid = localStorage.getItem('tb_uid');
 if(!uid){
   uid = 'u_' + Math.random().toString(36).substring(2, 9);
   localStorage.setItem('tb_uid', uid);
 }
 
+// Стандартний Gemini API ключ
+var DEFAULT_GEMINI_KEY = 'AQ.Ab8RN6I0WTfXxAr5NODSU69gaXokaoPqYdyC4lv9f3itmoe9QQ';
+
+// Глобальний стан застосунку
 var profile = null;
 var tests = [];
 var allResults = [];
@@ -161,6 +167,7 @@ var autoNextTimer = null;
 var showKeyBox = false;
 var app = document.getElementById('app');
 
+// Кодування та декодування UTF-8 об'єктів у URL-безпечний Base64
 function encodePayload(obj){
   var json = JSON.stringify(obj);
   var bytes = new TextEncoder().encode(json);
@@ -182,6 +189,7 @@ function decodePayload(str){
   }
 }
 
+// Нормалізація структури запитання (single, multi, text)
 function normalizeQuestion(q){
   var type = q.type || 'single';
   var points = Math.max(0.1, parseFloat(q.points) || 1);
@@ -216,6 +224,7 @@ function normalizeQuestion(q){
   };
 }
 
+// Завантаження та збереження стану у LocalStorage
 function loadStorage(){
   try{
     profile = JSON.parse(localStorage.getItem('tb_profile') || 'null');
@@ -242,19 +251,35 @@ function saveStorage(){
   }catch(e){}
 }
 
+// Екранування HTML-символів
 function esc(s){
   return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
     return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
   });
 }
 
+// Виведення сповіщень або помилок
 function showMsg(text, isErr){
-  notice = {text: text, err: !!isErr};
+  notice = {text: text, detail: '', err: !!isErr};
   clearTimeout(noticeTimer);
   noticeTimer = setTimeout(function(){
     notice = null;
     render();
   }, 5000);
+  render();
+}
+
+function showErrWithCode(mainMsg, errCode){
+  notice = {
+    text: mainMsg,
+    detail: errCode ? String(errCode) : '',
+    err: true
+  };
+  clearTimeout(noticeTimer);
+  noticeTimer = setTimeout(function(){
+    notice = null;
+    render();
+  }, 8000);
   render();
 }
 
@@ -278,6 +303,7 @@ function getTestMaxPoints(t){
   }, 0);
 }
 
+// Формування прямого посилання з кодованим тестом у хеші (#d=...)
 function makeTestLink(t){
   var compact = {
     id: t.id,
@@ -310,6 +336,7 @@ function makeTestLink(t){
   return base + '#d=' + payload;
 }
 
+// Розпізнавання тесту з посилання #d=... або локального коду
 function parseTestFromInput(raw){
   var val = (raw || '').trim();
   if(!val) return null;
@@ -402,6 +429,7 @@ function copyText(text, okLabel){
   document.body.removeChild(ta);
 }
 
+// Генерація та імпорт коду результату RES-...
 function makeResultCode(r){
   return 'RES-' + encodePayload({
     tid: r.testId,
@@ -470,6 +498,7 @@ function getQuestionEarnedPoints(q, ans){
   return ans === q.answerIndex ? maxPts : 0;
 }
 
+// Запуск проходження тесту з таймером та опційним перемішуванням питань
 function startRun(t, studentName){
   clearInterval(timerInt);
   clearTimeout(autoNextTimer);
@@ -548,7 +577,7 @@ function finishTest(byTimeout){
     testId: run.test.id,
     testTitle: run.test.title,
     studentName: run.studentName,
-    score: sc,
+    score: run.score,
     total: maxPts,
     submittedAt: new Date().toISOString()
   };
@@ -954,8 +983,8 @@ function renderEditor(){
     '<div class="row between" style="margin-bottom:10px">' +
       '<h2>' + (draft.id ? 'Редагування тесту' : 'Новий тест') + '</h2>' +
       '<div class="row">' +
-        '<button class="btn small" data-a="aiGenModal" title="Автоматично створити тест за допомогою ШІ">✨ ШІ-помічник</button>' +
-        '<button class="btn small" data-a="printDraft" title="Роздрукувати або зберегти як Word/PDF">🖨️ Роздрукувати / у Word</button>' +
+        '<button class="btn primary small" data-a="aiGenModal" title="Автоматично створити тест за допомогою ШІ">✨ ШІ-помічник</button>' +
+        '<button class="btn small" data-a="printDraft" title="Роздрукувати або зберегти як Word/PDF">🖨️ Друк / Word</button>' +
         '<button class="btn small" data-a="cancelDraft">Скасувати</button>' +
       '</div>' +
     '</div>' +
@@ -1049,18 +1078,25 @@ function renderEditor(){
 }
 
 function renderAiModal(){
+  var savedKey = localStorage.getItem('tb_gemini_key') || DEFAULT_GEMINI_KEY;
   return '<div class="card" style="border:2px solid var(--accent)">' +
     '<div class="row between">' +
       '<h2>✨ ШІ-помічник генерації тестів</h2>' +
       '<button class="btn small" data-a="closeAiModal">Закрити</button>' +
     '</div>' +
-    '<p class="muted">Введіть тему, клас та бажану кількість питань (наприклад: <i>«Таблиця множення на 7, 3 клас, 5 питань»</i> або <i>«Клітина рослин, 6 клас, 4 питання»</i>):</p>' +
+    '<p class="muted">Опишіть тему, клас, кількість і типи питань (наприклад: <i>«Дроби, 5 клас, 6 питань: 4 з вибором, 1 з кількома відповідями та 1 відкрите»</i>):</p>' +
     '<div style="margin-top:12px">' +
-      '<label class="f" for="aiPromptInp">Тема та опис тесту</label>' +
-      '<textarea id="aiPromptInp" placeholder="Наприклад: Видатні українські письменники, 9 клас, 5 питань..."></textarea>' +
+      '<label class="f" for="aiPromptInp">Завдання для ШІ</label>' +
+      '<textarea id="aiPromptInp" placeholder="Наприклад: Будова клітини, 6 клас, 5 питань з поясненнями..."></textarea>' +
     '</div>' +
+    '<details style="margin-top:10px">' +
+      '<summary class="muted" style="cursor:pointer;font-size:.85rem">Налаштування Gemini API ключа</summary>' +
+      '<div style="margin-top:8px">' +
+        '<input id="aiKeyInp" type="text" value="' + esc(savedKey) + '" placeholder="Вставте Gemini API Key">' +
+      '</div>' +
+    '</details>' +
     '<div class="row" style="margin-top:14px">' +
-      '<button class="btn primary" data-a="runAiGen">Згенерувати тест</button>' +
+      '<button class="btn primary" data-a="runAiGen">✨ Згенерувати тест</button>' +
       '<button class="btn" data-a="closeAiModal">Скасувати</button>' +
     '</div>' +
   '</div>';
@@ -1236,7 +1272,13 @@ function renderStudent(){
 function render(){
   var out = '';
   if(notice){
-    out += '<div class="' + (notice.err ? 'err' : 'good') + '">' + esc(notice.text) + '</div>';
+    if(notice.err){
+      out += '<div class="err"><div>' + esc(notice.text) + '</div>' +
+        (notice.detail ? '<div style="font-size:.82rem;opacity:.88;margin-top:4px;font-family:monospace">' + esc(notice.detail) + '</div>' : '') +
+      '</div>';
+    } else {
+      out += '<div class="good">' + esc(notice.text) + '</div>';
+    }
   }
 
   if(run){
@@ -1487,65 +1529,249 @@ app.addEventListener('click', function(e){
 
   if(a === 'runAiGen'){
     var promptInp = document.getElementById('aiPromptInp');
+    var keyInp = document.getElementById('aiKeyInp');
     var promptText = promptInp ? promptInp.value.trim() : '';
+    var apiKey = keyInp && keyInp.value.trim()
+      ? keyInp.value.trim()
+      : (localStorage.getItem('tb_gemini_key') || DEFAULT_GEMINI_KEY);
+
     if(!promptText){
       showMsg('Будь ласка, введіть тему тесту для генерації.', true);
       return;
     }
-    showMsg('🤖 ШІ генерує унікальні запитання через Gemini API, зачекайте кілька секунд...');
 
-    var sysPrompt = 'Ти професійний вчитель та методист. Створи тест українською мовою на задану тему у форматі чинного JSON масиву. Поверни ВИКЛЮЧНО валідний JSON-об\'єкт без жодних додаткових пояснень чи тексту поруч (без маркування markdown), із такою структурою:\n' +
-      '{\n  "title": "Назва тесту",\n  "description": "Короткий опис",\n  "questions": [\n    {\n      "type": "single",\n      "text": "Текст питання",\n      "options": ["варіант 1", "варіант 2", "варіант 3", "варіант 4"],\n      "answerIndex": 0,\n      "explanation": "Пояснення правильної відповіді"\n    }\n  ]\n}';
+    localStorage.setItem('tb_gemini_key', apiKey);
 
-    var apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent';
+    var genBtn = el;
+    var origBtnText = genBtn ? genBtn.textContent : '';
+    if(genBtn){
+      genBtn.disabled = true;
+      genBtn.textContent = 'Генерую...';
+    }
+
+    showMsg('🤖 ШІ створює унікальні запитання, зачекайте кілька секунд...');
+
+    var models = ['gemini-3.8-flash', 'gemini-3-flash-preview'];
+    var sysPrompt = 'Ти досвідчений український вчитель-методист. Створи якісний, грамотний і цікавий тест українською мовою на задану тему. ' +
+      'Якщо кількість питань не вказана, зроби 5 різноманітних питань. ' +
+      'Поверни ВИКЛЮЧНО чистий валідний JSON-об\'єкт без markdown-обгорток та пояснень зовні.\n' +
+      'Доступні типи питань:\n' +
+      '1) "single" — одна правильна відповідь (поля: "type": "single", "text", "options": [4 варіанти], "answerIndex": 0..3, "points": 1, "explanation")\n' +
+      '2) "multi" — кілька правильних відповідей (поля: "type": "multi", "text", "options": [4 варіанти], "answerIndices": [0, 2], "points": 2, "explanation")\n' +
+      '3) "text" — коротка відкрита відповідь словом або числом (поля: "type": "text", "text", "correctText": "відповідь1|синонім2", "points": 2, "explanation")\n' +
+      'Структура відповіді:\n' +
+      '{\n' +
+      '  "title": "Назва тесту",\n' +
+      '  "description": "Коротка інструкція для учнів",\n' +
+      '  "questions": [ ... ]\n' +
+      '}';
+
     var payload = {
-      contents: [{ parts: [{ text: 'Згенеруй детальний тест з теми: ' + promptText }] }],
-      systemInstruction: { parts: [{ text: sysPrompt }] },
-      generationConfig: { responseMimeType: 'application/json' }
+      contents: [{
+        role: 'user',
+        parts: [{ text: 'Створи тест українською мовою за запитом: ' + promptText }]
+      }],
+      systemInstruction: {
+        parts: [{ text: sysPrompt }]
+      },
+      generationConfig: {
+        temperature: 0.5,
+        responseMimeType: 'application/json'
+      }
     };
 
-    fetch(apiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    })
-    .then(function(res){ return res.json(); })
-    .then(function(data){
-      var candidate = data.candidates && data.candidates[0];
-      var rawJson = candidate && candidate.content && candidate.content.parts && candidate.content.parts[0] && candidate.content.parts[0].text;
-      if(!rawJson) throw new Error('Пуста відповідь ШІ');
-      
-      // Очищення від можливих зайвих маркерів
-      rawJson = rawJson.replace(/```json/g, '').replace(/```/g, '').trim();
-      var parsed = JSON.parse(rawJson);
+    function restoreGenBtn(){
+      if(genBtn){
+        genBtn.disabled = false;
+        genBtn.textContent = origBtnText || '✨ Згенерувати тест';
+      }
+    }
 
-      if(parsed && parsed.title) draft.title = parsed.title;
-      else draft.title = promptText;
+    function extractTextFromResponse(data){
+      var candidates = data && Array.isArray(data.candidates) ? data.candidates : [];
+      for(var c = 0; c < candidates.length; c++){
+        var parts = candidates[c] && candidates[c].content && Array.isArray(candidates[c].content.parts)
+          ? candidates[c].content.parts
+          : [];
+        var nonThought = [];
+        var allText = [];
+        for(var p = 0; p < parts.length; p++){
+          if(parts[p] && typeof parts[p].text === 'string'){
+            allText.push(parts[p].text);
+            if(!parts[p].thought) nonThought.push(parts[p].text);
+          }
+        }
+        if(nonThought.length) return nonThought.join('\n').trim();
+        if(allText.length) return allText.join('\n').trim();
+      }
+      return '';
+    }
 
-      if(parsed && parsed.description) draft.description = parsed.description;
-      else draft.description = 'Тест з теми: ' + promptText;
+    function parseJsonSafe(rawText){
+      var cleaned = String(rawText || '')
+        .replace(/^```json\s*/i, '')
+        .replace(/^```\s*/i, '')
+        .replace(/```$/i, '')
+        .trim();
 
-      if(parsed && Array.isArray(parsed.questions) && parsed.questions.length > 0){
-        draft.questions = parsed.questions.map(function(q){
-          return normalizeQuestion({
-            type: q.type || 'single',
-            text: q.text || 'Питання',
-            options: Array.isArray(q.options) ? q.options : ['Варіант А', 'Варіант Б'],
-            answerIndex: typeof q.answerIndex === 'number' ? q.answerIndex : 0,
-            points: 1,
-            explanation: q.explanation || ''
-          });
-        });
+      try{
+        return JSON.parse(cleaned);
+      }catch(e){
+        var firstObj = cleaned.indexOf('{');
+        var lastObj = cleaned.lastIndexOf('}');
+        if(firstObj !== -1 && lastObj > firstObj){
+          return JSON.parse(cleaned.slice(firstObj, lastObj + 1));
+        }
+        var firstArr = cleaned.indexOf('[');
+        var lastArr = cleaned.lastIndexOf(']');
+        if(firstArr !== -1 && lastArr > firstArr){
+          return JSON.parse(cleaned.slice(firstArr, lastArr + 1));
+        }
+        throw e;
+      }
+    }
+
+    function applyGeneratedTest(parsed, fallbackTopic){
+      var rawQuestions = [];
+      if(Array.isArray(parsed)){
+        rawQuestions = parsed;
+      } else if(parsed && Array.isArray(parsed.questions)){
+        rawQuestions = parsed.questions;
+      } else if(parsed && Array.isArray(parsed.items)){
+        rawQuestions = parsed.items;
       }
 
-      var m = document.getElementById('aiGenWrap');
-      if(m) m.remove();
-      render();
-      showMsg('✨ ШІ успішно створив унікальні запитання спеціально для вашої теми!');
-    })
-    .catch(function(err){
-      showMsg('Не вдалося згенерувати через мережу. Спробуйте ще раз.', true);
-    });
+      if(!rawQuestions.length){
+        throw new Error('Модель не повернула жодного запитання.');
+      }
+
+      if(parsed && !Array.isArray(parsed) && parsed.title){
+        draft.title = String(parsed.title);
+      } else if(!draft.title){
+        draft.title = fallbackTopic;
+      }
+
+      if(parsed && !Array.isArray(parsed) && parsed.description){
+        draft.description = String(parsed.description);
+      } else if(!draft.description){
+        draft.description = 'Тест з теми: ' + fallbackTopic;
+      }
+
+      draft.questions = rawQuestions.map(function(q, idx){
+        var qType = (q.type === 'multi' || q.type === 'text') ? q.type : 'single';
+        if(qType === 'text'){
+          return normalizeQuestion({
+            type: 'text',
+            text: q.text || q.question || ('Питання ' + (idx + 1)),
+            correctText: String(q.correctText || q.answer || ''),
+            points: q.points || 1,
+            explanation: q.explanation || ''
+          });
+        }
+
+        var opts = Array.isArray(q.options) && q.options.length >= 2
+          ? q.options.map(String)
+          : ['Варіант А', 'Варіант Б', 'Варіант В', 'Варіант Г'];
+
+        if(qType === 'multi'){
+          var validMulti = Array.isArray(q.answerIndices)
+            ? q.answerIndices.filter(function(i){ return typeof i === 'number' && i >= 0 && i < opts.length; })
+            : [0];
+          if(!validMulti.length) validMulti = [0];
+          return normalizeQuestion({
+            type: 'multi',
+            text: q.text || q.question || ('Питання ' + (idx + 1)),
+            options: opts,
+            answerIndices: validMulti,
+            points: q.points || 1,
+            explanation: q.explanation || ''
+          });
+        }
+
+        var ansIdx = typeof q.answerIndex === 'number' ? q.answerIndex : 0;
+        if(ansIdx < 0 || ansIdx >= opts.length) ansIdx = 0;
+
+        return normalizeQuestion({
+          type: 'single',
+          text: q.text || q.question || ('Питання ' + (idx + 1)),
+          options: opts,
+          answerIndex: ansIdx,
+          points: q.points || 1,
+          explanation: q.explanation || ''
+        });
+      });
+    }
+
+    function callGeminiModel(modelName){
+      var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent?key=' + encodeURIComponent(apiKey);
+      var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+      var timer = controller ? setTimeout(function(){ controller.abort(); }, 35000) : null;
+
+      return fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        signal: controller ? controller.signal : undefined
+      })
+      .then(function(res){
+        if(timer) clearTimeout(timer);
+        return res.text().then(function(rawBody){
+          var jsonBody = null;
+          try{ jsonBody = rawBody ? JSON.parse(rawBody) : null; }catch(e){}
+          if(!res.ok){
+            var apiErr = jsonBody && jsonBody.error ? jsonBody.error : null;
+            var msg = apiErr && apiErr.message ? apiErr.message : ('HTTP ' + res.status);
+            var err = new Error(msg);
+            err.httpStatus = res.status;
+            throw err;
+          }
+          return jsonBody || {};
+        });
+      })
+      .catch(function(err){
+        if(timer) clearTimeout(timer);
+        if(err && err.name === 'AbortError'){
+          throw new Error('Час очікування відповіді від ШІ вичерпано (35 с).');
+        }
+        throw err;
+      });
+    }
+
+    (async function runGenerationFlow(){
+      var lastError = null;
+
+      for(var i = 0; i < models.length; i++){
+        try{
+          if(i > 0){
+            showMsg('🔄 Пробую резервну модель ШІ (' + models[i] + ')...');
+          }
+          var apiData = await callGeminiModel(models[i]);
+          var textOut = extractTextFromResponse(apiData);
+          if(!textOut){
+            throw new Error('ШІ повернув порожню відповідь.');
+          }
+          var parsedJson = parseJsonSafe(textOut);
+          applyGeneratedTest(parsedJson, promptText);
+
+          restoreGenBtn();
+          var wrapEl = document.getElementById('aiGenWrap');
+          if(wrapEl) wrapEl.remove();
+          render();
+          showMsg('✨ Готово! ШІ згенерував запитань: ' + draft.questions.length);
+          return;
+        }catch(err){
+          lastError = err;
+          if(err && (err.httpStatus === 400 || err.httpStatus === 403)){
+            break;
+          }
+        }
+      }
+
+      restoreGenBtn();
+      var errText = lastError && lastError.message ? lastError.message : 'Невідома помилка мережі';
+      showErrWithCode('Не вдалося згенерувати тест через Gemini API. Перевірте API-ключ або з\'єднання.', errText);
+    })();
+
     return;
   }
 
@@ -1572,7 +1798,7 @@ app.addEventListener('click', function(e){
       if(q.type === 'text'){
         htmlContent += '<div class="opt">Відповідь: ________________________________________________</div>';
       } else if(Array.isArray(q.options)){
-        q.options.forEach(function(opt, oi){
+        q.options.forEach(function(opt){
           if((opt || '').trim() !== ''){
             htmlContent += '<div class="opt">&#9633; ' + esc(opt) + '</div>';
           }
