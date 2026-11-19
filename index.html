@@ -1,0 +1,1895 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Конструктор тестів</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{
+  --bg:#f2f5fb;--surface:#ffffff;--ink:#1c2740;--muted:#5d6a86;--line:#d5ddee;
+  --accent:#2f5bd8;--accent-ink:#ffffff;--ok:#1f8a4c;--ok-bg:#e3f4ea;--bad:#c23a3a;--bad-bg:#fbe7e7;
+  --warn:#b45309;--warn-bg:#fef3c7;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#121a2e;--surface:#1b2640;--ink:#e8edf8;--muted:#9aa8c7;--line:#2e3b5c;
+    --accent:#7d9dff;--accent-ink:#0d1630;--ok:#6fd49a;--ok-bg:#183a2a;--bad:#ff8f8f;--bad-bg:#43202a;
+    --warn:#fbbf24;--warn-bg:#3b2d14;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121a2e;--surface:#1b2640;--ink:#e8edf8;--muted:#9aa8c7;--line:#2e3b5c;
+  --accent:#7d9dff;--accent-ink:#0d1630;--ok:#6fd49a;--ok-bg:#183a2a;--bad:#ff8f8f;--bad-bg:#43202a;
+  --warn:#fbbf24;--warn-bg:#3b2d14;
+  color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Onest",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.55;font-size:16px;-webkit-text-size-adjust:100%}
+.wrap{max-width:780px;margin:0 auto;padding:16px 12px 64px}
+.top-hdr{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
+h1{font-size:1.5rem;font-weight:800;margin:0;letter-spacing:-.01em}
+h2{font-size:1.15rem;margin:0 0 10px}
+.tabs{display:flex;gap:4px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:4px;overflow-x:auto}
+.tab{border:0;background:none;color:var(--muted);font:inherit;font-weight:700;padding:8px 12px;border-radius:9px;cursor:pointer;white-space:nowrap}
+.tab[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
+.q-card{border-left:5px solid var(--accent)}
+label.f{display:block;font-weight:700;font-size:.9rem;margin-bottom:6px}
+input[type=text],input[type=number],select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;-webkit-appearance:none}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%235d6a86' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:34px}
+textarea{resize:vertical;min-height:70px}
+input:focus-visible,textarea:focus-visible,select:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.opt{display:flex;align-items:center;gap:10px;margin-top:8px}
+.opt input[type=radio],.opt input[type=checkbox]{width:22px;height:22px;accent-color:var(--accent);flex:none;cursor:pointer}
+.btn{font:inherit;font-weight:700;border-radius:10px;padding:10px 16px;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--ink);min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:6px;text-decoration:none}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.danger{color:var(--bad)}
+.btn.small{padding:6px 12px;font-size:.88rem;min-height:36px}
+.btn.viber{background:#7360f2;color:#fff;border-color:#7360f2}
+.btn.tg{background:#24a1de;color:#fff;border-color:#24a1de}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.row.between{justify-content:space-between}
+.muted{color:var(--muted);font-size:.9rem}
+.hint{font-size:.85rem;color:var(--muted);margin-top:8px}
+.err{background:var(--bad-bg);color:var(--bad);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-weight:500}
+.good{background:var(--ok-bg);color:var(--ok);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-weight:500}
+.choice{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1px solid var(--line);border-radius:10px;margin-top:8px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .15s ease,border-color .15s ease}
+.choice.sel{background:color-mix(in srgb, var(--accent) 12%, var(--surface));border-color:var(--accent)}
+.choice input{margin-top:3px;accent-color:var(--accent);width:20px;height:20px;flex:none}
+.choice.ok{background:var(--ok-bg);border-color:var(--ok)}
+.choice.bad{background:var(--bad-bg);border-color:var(--bad)}
+.score{font-size:2.2rem;font-weight:800;margin:4px 0}
+.empty{text-align:center;padding:24px 12px;color:var(--muted)}
+.list-item{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-direction:column;padding:14px 0;border-top:1px solid var(--line)}
+@media(min-width:520px){.list-item{flex-direction:row;align-items:center}}
+.list-item:first-of-type{border-top:0}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tbl{width:100%;border-collapse:collapse;font-size:.9rem}
+.tbl th,.tbl td{text-align:left;padding:8px 10px;border-top:1px solid var(--line);white-space:nowrap}
+.tbl th{color:var(--muted);font-weight:700;border-top:0}
+.pill{display:inline-block;padding:2px 8px;border-radius:99px;font-weight:700;font-size:.82rem;background:var(--bad-bg);color:var(--bad)}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}
+.pill.info{background:color-mix(in srgb, var(--accent) 15%, var(--surface));color:var(--accent)}
+.timer-bar{position:sticky;top:8px;z-index:10;background:var(--surface);border:2px solid var(--accent);border-radius:12px;padding:10px 14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.timer-val{font-weight:800;font-size:1.1rem;font-variant-numeric:tabular-nums;color:var(--accent)}
+.timer-bar.warn{border-color:var(--bad);background:var(--bad-bg)}
+.timer-bar.warn .timer-val{color:var(--bad)}
+.chk-row{display:flex;align-items:center;gap:10px;margin-top:10px;cursor:pointer;font-size:.93rem}
+.chk-row input[type=checkbox]{width:20px;height:20px;accent-color:var(--accent);flex:none}
+.code-box{background:var(--bg);border:1px dashed var(--accent);border-radius:10px;padding:12px;margin-top:10px;word-break:break-all}
+.prog-wrap{background:var(--line);height:8px;border-radius:99px;overflow:hidden;margin:10px 0 4px}
+.prog-fill{background:var(--accent);height:100%;transition:width .25s ease;border-radius:99px}
+.q-dots{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.q-dot{width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--muted);font:inherit;font-weight:700;font-size:.82rem;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+.q-dot.cur{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.qr-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fff;padding:14px;border-radius:12px;border:1px solid var(--line);width:fit-content;margin:12px auto}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px}
+.stat-box{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px}
+.stat-num{font-size:1.45rem;font-weight:800;color:var(--accent)}
+.exp-box{background:var(--warn-bg);color:var(--warn);border-radius:10px;padding:10px 12px;margin-top:10px;font-size:.9rem}
+.q-meta-grid{display:grid;grid-template-columns:1fr 110px;gap:10px;margin-bottom:10px}
+@media(max-width:460px){.q-meta-grid{grid-template-columns:1fr}}
+
+@media print {
+  body { background: #fff !important; color: #000 !important; font-size: 14pt !important; }
+  .wrap { max-width: 100% !important; padding: 0 !important; }
+  .top-hdr, .tabs, button, .card:not(.print-card), input[type=checkbox], input[type=radio] { display: none !important; }
+  .card { border: 0 !important; padding: 0 !important; margin: 0 0 20px 0 !important; box-shadow: none !important; background: #fff !important; }
+  .print-only { display: block !important; }
+}
+.print-only { display: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top-hdr">
+    <h1>Конструктор тестів</h1>
+    <button type="button" class="btn small" id="themeBtn" title="Змінити тему">🌓 Тема</button>
+  </div>
+  <main id="app"></main>
+</div>
+
+<script>
+var savedTheme = localStorage.getItem('tb_theme') || '';
+if(savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+function updateThemeBtn(){
+  var btn = document.getElementById('themeBtn');
+  if(!btn) return;
+  var cur = document.documentElement.getAttribute('data-theme');
+  if(cur === 'dark') btn.textContent = '☀️ Світла';
+  else if(cur === 'light') btn.textContent = '🌙 Темна';
+  else btn.textContent = '🌓 Тема';
+}
+updateThemeBtn();
+document.getElementById('themeBtn').addEventListener('click', function(){
+  var cur = document.documentElement.getAttribute('data-theme');
+  var next = cur === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('tb_theme', next);
+  updateThemeBtn();
+});
+
+var uid = localStorage.getItem('tb_uid');
+if(!uid){
+  uid = 'u_' + Math.random().toString(36).substring(2, 9);
+  localStorage.setItem('tb_uid', uid);
+}
+
+var profile = null;
+var tests = [];
+var allResults = [];
+var myRes = {};
+var tab = 'tests';
+var resFilterTest = 'ALL';
+var draft = null;
+var run = null;
+var directTest = null;
+var notice = null;
+var noticeTimer = null;
+var pendingDel = null;
+var pendingLeave = false;
+var shareModal = null;
+var timerInt = null;
+var autoNextTimer = null;
+var showKeyBox = false;
+var app = document.getElementById('app');
+
+function encodePayload(obj){
+  var json = JSON.stringify(obj);
+  var bytes = new TextEncoder().encode(json);
+  var bin = '';
+  for(var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function decodePayload(str){
+  try{
+    var b64 = str.trim().replace(/-/g, '+').replace(/_/g, '/');
+    while(b64.length % 4) b64 += '=';
+    var bin = atob(b64);
+    var bytes = new Uint8Array(bin.length);
+    for(var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return JSON.parse(new TextDecoder().decode(bytes));
+  }catch(e){
+    return null;
+  }
+}
+
+function normalizeQuestion(q){
+  var type = q.type || 'single';
+  var points = Math.max(0.1, parseFloat(q.points) || 1);
+  var exp = q.explanation || '';
+  if(type === 'text'){
+    return {
+      type: 'text',
+      text: q.text || '',
+      correctText: q.correctText || '',
+      points: points,
+      explanation: exp
+    };
+  }
+  if(type === 'multi'){
+    var arr = Array.isArray(q.answerIndices) ? q.answerIndices.slice() : (typeof q.answerIndex === 'number' ? [q.answerIndex] : [0]);
+    return {
+      type: 'multi',
+      text: q.text || '',
+      options: Array.isArray(q.options) ? q.options.slice() : ['', ''],
+      answerIndices: arr,
+      points: points,
+      explanation: exp
+    };
+  }
+  return {
+    type: 'single',
+    text: q.text || '',
+    options: Array.isArray(q.options) ? q.options.slice() : ['', ''],
+    answerIndex: typeof q.answerIndex === 'number' ? q.answerIndex : 0,
+    points: points,
+    explanation: exp
+  };
+}
+
+function loadStorage(){
+  try{
+    profile = JSON.parse(localStorage.getItem('tb_profile') || 'null');
+    tests = JSON.parse(localStorage.getItem('tb_tests') || '[]').map(function(t){
+      t.questions = (t.questions || []).map(normalizeQuestion);
+      return t;
+    });
+    allResults = JSON.parse(localStorage.getItem('tb_results') || '[]');
+    myRes = JSON.parse(localStorage.getItem('tb_my_res') || '{}');
+  }catch(e){
+    tests = [];
+    allResults = [];
+    myRes = {};
+  }
+}
+
+function saveStorage(){
+  try{
+    if(profile) localStorage.setItem('tb_profile', JSON.stringify(profile));
+    else localStorage.removeItem('tb_profile');
+    localStorage.setItem('tb_tests', JSON.stringify(tests));
+    localStorage.setItem('tb_results', JSON.stringify(allResults));
+    localStorage.setItem('tb_my_res', JSON.stringify(myRes));
+  }catch(e){}
+}
+
+function esc(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+
+function showMsg(text, isErr){
+  notice = {text: text, err: !!isErr};
+  clearTimeout(noticeTimer);
+  noticeTimer = setTimeout(function(){
+    notice = null;
+    render();
+  }, 5000);
+  render();
+}
+
+function genTeacherKey(){
+  var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  var res = 'TCH-';
+  for(var i = 0; i < 6; i++) res += chars.charAt(Math.floor(Math.random() * chars.length));
+  return res;
+}
+
+function genCode(){
+  var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  var res = '';
+  for(var i = 0; i < 6; i++) res += chars.charAt(Math.floor(Math.random() * chars.length));
+  return res;
+}
+
+function getTestMaxPoints(t){
+  return (t.questions || []).reduce(function(sum, q){
+    return sum + (Math.max(0.1, parseFloat(q.points) || 1));
+  }, 0);
+}
+
+function makeTestLink(t){
+  var compact = {
+    id: t.id,
+    c: t.code,
+    t: t.title,
+    d: t.description || '',
+    m: t.timeLimit || 0,
+    s: t.shuffle ? 1 : 0,
+    o: t.ownerName || 'Вчитель',
+    q: (t.questions || []).map(function(rawQ){
+      var q = normalizeQuestion(rawQ);
+      var item = {t: q.text, p: q.points};
+      if(q.explanation) item.e = q.explanation;
+      if(q.type === 'text'){
+        item.tp = 'text';
+        item.ct = q.correctText;
+      } else if(q.type === 'multi'){
+        item.tp = 'multi';
+        item.o = q.options;
+        item.ai = q.answerIndices;
+      } else {
+        item.o = q.options;
+        item.a = q.answerIndex;
+      }
+      return item;
+    })
+  };
+  var payload = encodePayload(compact);
+  var base = window.location.href.split('#')[0];
+  return base + '#d=' + payload;
+}
+
+function parseTestFromInput(raw){
+  var val = (raw || '').trim();
+  if(!val) return null;
+
+  var dIdx = val.indexOf('#d=');
+  if(dIdx !== -1){
+    val = val.substring(dIdx + 3);
+  } else if(val.indexOf('d=') === 0){
+    val = val.substring(2);
+  }
+
+  if(val.length > 20){
+    var obj = decodePayload(val);
+    if(obj && obj.t && Array.isArray(obj.q)){
+      return {
+        id: obj.id || ('ext_' + Date.now()),
+        code: obj.c || 'LINK',
+        title: obj.t,
+        description: obj.d || '',
+        timeLimit: obj.m || 0,
+        shuffle: !!obj.s,
+        ownerName: obj.o || 'Вчитель',
+        questions: obj.q.map(function(item){
+          var tp = item.tp || 'single';
+          if(tp === 'text'){
+            return {
+              type: 'text',
+              text: item.t || '',
+              correctText: item.ct || '',
+              points: item.p || 1,
+              explanation: item.e || ''
+            };
+          }
+          if(tp === 'multi'){
+            return {
+              type: 'multi',
+              text: item.t || '',
+              options: item.o || [],
+              answerIndices: Array.isArray(item.ai) ? item.ai : [],
+              points: item.p || 1,
+              explanation: item.e || ''
+            };
+          }
+          return {
+            type: 'single',
+            text: item.t || '',
+            options: item.o || [],
+            answerIndex: typeof item.a === 'number' ? item.a : 0,
+            points: item.p || 1,
+            explanation: item.e || ''
+          };
+        })
+      };
+    }
+  }
+
+  var upper = val.toUpperCase();
+  var local = tests.find(function(x){ return (x.code || '').toUpperCase() === upper; });
+  return local || null;
+}
+
+function checkUrlHash(){
+  var hash = window.location.hash || '';
+  if(hash.indexOf('#d=') === 0){
+    var parsed = parseTestFromInput(hash);
+    if(parsed){
+      directTest = parsed;
+      if(!tests.some(function(x){ return x.id === parsed.id; })){
+        tests.unshift(parsed);
+        saveStorage();
+      }
+      try{ history.replaceState(null, '', window.location.pathname + window.location.search); }catch(e){}
+    }
+  }
+}
+
+function copyText(text, okLabel){
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try{
+    document.execCommand('copy');
+    showMsg(okLabel || 'Скопійовано у буфер обміну!');
+  }catch(e){
+    showMsg('Виділіть і скопіюйте текст вручну.', true);
+  }
+  document.body.removeChild(ta);
+}
+
+function makeResultCode(r){
+  return 'RES-' + encodePayload({
+    tid: r.testId,
+    tt: r.testTitle,
+    sn: r.studentName,
+    sc: r.score,
+    tot: r.total,
+    at: r.submittedAt
+  });
+}
+
+function importResultCode(raw){
+  var val = (raw || '').trim();
+  if(val.indexOf('RES-') === 0) val = val.substring(4);
+  var obj = decodePayload(val);
+  if(!obj || !obj.sn || typeof obj.sc !== 'number' || !obj.tot){
+    showMsg('Невірний код результату. Перевірте, чи скопійовано повністю.', true);
+    return;
+  }
+  var exists = allResults.some(function(x){
+    return x.studentName === obj.sn && x.testTitle === obj.tt && x.submittedAt === obj.at;
+  });
+  if(exists){
+    showMsg('Цей результат уже додано до списку.');
+    return;
+  }
+  allResults.unshift({
+    id: 'res_' + Date.now() + '_' + Math.random().toString(36).substring(2, 5),
+    testId: obj.tid || '',
+    testTitle: obj.tt || 'Тест',
+    studentName: obj.sn,
+    score: obj.sc,
+    total: obj.tot,
+    submittedAt: obj.at || new Date().toISOString()
+  });
+  saveStorage();
+  showMsg('Результат учня «' + obj.sn + '» успішно додано!');
+}
+
+function isQuestionAnswered(q, ans){
+  if(q.type === 'multi') return Array.isArray(ans) && ans.length > 0;
+  if(q.type === 'text') return typeof ans === 'string' && ans.trim() !== '';
+  return typeof ans === 'number' && ans !== -1;
+}
+
+function getQuestionEarnedPoints(q, ans){
+  var maxPts = Math.max(0.1, parseFloat(q.points) || 1);
+  if(q.type === 'text'){
+    var expected = (q.correctText || '').trim().toLowerCase().replace(/\s+/g, ' ');
+    var actual = (typeof ans === 'string' ? ans : '').trim().toLowerCase().replace(/\s+/g, ' ');
+    if(!expected || !actual) return 0;
+    var variants = expected.split('|').map(function(v){ return v.trim(); });
+    return variants.indexOf(actual) !== -1 ? maxPts : 0;
+  }
+  if(q.type === 'multi'){
+    if(!Array.isArray(ans) || !ans.length) return 0;
+    var expArr = (q.answerIndices || []);
+    if(!expArr.length) return 0;
+    var correctPicked = 0;
+    ans.forEach(function(idx){
+      if(expArr.indexOf(idx) !== -1) correctPicked++;
+    });
+    var ratio = correctPicked / expArr.length;
+    return Math.round(maxPts * ratio * 100) / 100;
+  }
+  return ans === q.answerIndex ? maxPts : 0;
+}
+
+function startRun(t, studentName){
+  clearInterval(timerInt);
+  clearTimeout(autoNextTimer);
+  var qs = (t.questions || []).map(function(rawQ, idx){
+    var q = normalizeQuestion(rawQ);
+    q.origIdx = idx;
+    return q;
+  });
+  if(t.shuffle){
+    for(var i = qs.length - 1; i > 0; i--){
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = qs[i]; qs[i] = qs[j]; qs[j] = tmp;
+    }
+  }
+  var initAns = qs.map(function(q){
+    if(q.type === 'multi') return [];
+    if(q.type === 'text') return '';
+    return -1;
+  });
+  var limitSec = (t.timeLimit && t.timeLimit > 0) ? t.timeLimit * 60 : 0;
+  run = {
+    test: t,
+    studentName: studentName || (profile ? profile.name : 'Учень'),
+    questions: qs,
+    answers: initAns,
+    curr: 0,
+    done: false,
+    score: 0,
+    totalPoints: getTestMaxPoints(t),
+    leftSec: limitSec,
+    resultCode: ''
+  };
+  pendingLeave = false;
+  if(limitSec > 0){
+    timerInt = setInterval(function(){
+      if(!run || run.done){ clearInterval(timerInt); return; }
+      run.leftSec--;
+      if(run.leftSec <= 0){
+        run.leftSec = 0;
+        clearInterval(timerInt);
+        finishTest(true);
+      } else {
+        var el = document.getElementById('timerVal');
+        var bar = document.getElementById('timerBar');
+        if(el) el.textContent = fmtTime(run.leftSec);
+        if(bar && run.leftSec <= 30) bar.classList.add('warn');
+      }
+    }, 1000);
+  }
+  render();
+}
+
+function fmtTime(sec){
+  var m = Math.floor(sec / 60);
+  var s = sec % 60;
+  return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+}
+
+function finishTest(byTimeout){
+  if(!run || run.done) return;
+  clearInterval(timerInt);
+  clearTimeout(autoNextTimer);
+  var sc = 0;
+  var maxPts = 0;
+  run.questions.forEach(function(q, i){
+    var pts = Math.max(0.1, parseFloat(q.points) || 1);
+    maxPts += pts;
+    sc += getQuestionEarnedPoints(q, run.answers[i]);
+  });
+  run.score = Math.round(sc * 100) / 100;
+  run.totalPoints = maxPts;
+  run.done = true;
+
+  var rec = {
+    id: 'res_' + Date.now(),
+    testId: run.test.id,
+    testTitle: run.test.title,
+    studentName: run.studentName,
+    score: sc,
+    total: maxPts,
+    submittedAt: new Date().toISOString()
+  };
+
+  allResults.unshift(rec);
+  myRes[run.test.id] = rec;
+  run.resultCode = makeResultCode(rec);
+  saveStorage();
+
+  if(byTimeout) showMsg('Час вичерпано! Тест завершено автоматично.');
+  render();
+}
+
+function newDraft(existing){
+  if(existing){
+    draft = {
+      id: existing.id,
+      code: existing.code,
+      title: existing.title,
+      description: existing.description || '',
+      timeLimit: existing.timeLimit || 0,
+      shuffle: !!existing.shuffle,
+      questions: (existing.questions || []).map(function(rawQ){
+        var q = normalizeQuestion(rawQ);
+        return {
+          type: q.type,
+          text: q.text,
+          options: q.options ? q.options.slice() : ['', '', '', ''],
+          answerIndex: typeof q.answerIndex === 'number' ? q.answerIndex : 0,
+          answerIndices: Array.isArray(q.answerIndices) ? q.answerIndices.slice() : [0],
+          correctText: q.correctText || '',
+          points: q.points || 1,
+          explanation: q.explanation || ''
+        };
+      })
+    };
+  } else {
+    draft = {
+      id: null,
+      code: genCode(),
+      title: '',
+      description: '',
+      timeLimit: 0,
+      shuffle: false,
+      questions: [{
+        type: 'single',
+        text: '',
+        options: ['', '', '', ''],
+        answerIndex: 0,
+        answerIndices: [0],
+        correctText: '',
+        points: 1,
+        explanation: ''
+      }]
+    };
+  }
+}
+
+function saveDraft(){
+  var title = (draft.title || '').trim();
+  if(!title){ showMsg('Введіть назву тесту.', true); return; }
+  if(!draft.questions.length){ showMsg('Додайте хоча б одне питання.', true); return; }
+
+  for(var i = 0; i < draft.questions.length; i++){
+    var q = draft.questions[i];
+    if(!(q.text || '').trim()){
+      showMsg('Заповніть текст питання №' + (i + 1) + '.', true);
+      return;
+    }
+    if(q.type === 'text'){
+      if(!(q.correctText || '').trim()){
+        showMsg('Вкажіть правильну відповідь для питання №' + (i + 1) + '.', true);
+        return;
+      }
+    } else {
+      var filled = q.options.filter(function(o){ return (o || '').trim() !== ''; });
+      if(filled.length < 2){
+        showMsg('У питанні №' + (i + 1) + ' має бути щонайменше 2 варіанти відповіді.', true);
+        return;
+      }
+    }
+  }
+
+  var cleanQs = draft.questions.map(function(q){
+    var pts = Math.max(0.1, parseFloat(q.points) || 1);
+    var exp = (q.explanation || '').trim();
+    if(q.type === 'text'){
+      return {
+        type: 'text',
+        text: q.text.trim(),
+        correctText: q.correctText.trim(),
+        points: pts,
+        explanation: exp
+      };
+    }
+    var opts = [];
+    var newAns = 0;
+    var newMulti = [];
+    q.options.forEach(function(o, idx){
+      if((o || '').trim() !== ''){
+        var mappedIdx = opts.length;
+        if(idx === q.answerIndex) newAns = mappedIdx;
+        if(Array.isArray(q.answerIndices) && q.answerIndices.indexOf(idx) !== -1) newMulti.push(mappedIdx);
+        opts.push(o.trim());
+      }
+    });
+    if(q.type === 'multi'){
+      return {
+        type: 'multi',
+        text: q.text.trim(),
+        options: opts,
+        answerIndices: newMulti,
+        points: pts,
+        explanation: exp
+      };
+    }
+    return {
+      type: 'single',
+      text: q.text.trim(),
+      options: opts,
+      answerIndex: newAns,
+      points: pts,
+      explanation: exp
+    };
+  });
+
+  var obj = {
+    id: draft.id || ('t_' + Date.now()),
+    code: draft.code || genCode(),
+    title: title,
+    description: (draft.description || '').trim(),
+    timeLimit: Math.max(0, parseInt(draft.timeLimit, 10) || 0),
+    shuffle: !!draft.shuffle,
+    ownerId: uid,
+    ownerName: profile ? profile.name : 'Вчитель',
+    questions: cleanQs,
+    updatedAt: new Date().toISOString()
+  };
+
+  var idx = tests.findIndex(function(x){ return x.id === obj.id; });
+  if(idx !== -1) tests[idx] = obj;
+  else tests.unshift(obj);
+
+  saveStorage();
+  draft = null;
+  tab = 'tests';
+  shareModal = obj;
+  showMsg('Тест збережено! Поділіться посиланням або QR-кодом з учнями.');
+}
+
+function renderDirectStart(){
+  var t = directTest;
+  var maxPts = getTestMaxPoints(t);
+  var defName = profile ? profile.name : '';
+  return '<div class="card">' +
+    '<div class="muted" style="font-weight:700;margin-bottom:4px">Запрошення на тестування</div>' +
+    '<h2>' + esc(t.title) + '</h2>' +
+    (t.description ? '<p class="muted">' + esc(t.description) + '</p>' : '') +
+    '<p class="muted">Питань: <b>' + (t.questions ? t.questions.length : 0) + '</b> · Макс. балів: <b>' + maxPts + '</b>' +
+      (t.timeLimit > 0 ? ' · Ліміт часу: <b>' + t.timeLimit + ' хв</b>' : '') +
+    '</p>' +
+    '<div style="margin-top:14px">' +
+      '<label class="f" for="directName">Ваше прізвище та ім’я</label>' +
+      '<input id="directName" type="text" placeholder="Наприклад: Коваленко Олена" value="' + esc(defName) + '">' +
+    '</div>' +
+    '<div class="row" style="margin-top:14px">' +
+      '<button class="btn primary" data-a="beginDirect">Почати тест</button>' +
+      '<button class="btn" data-a="cancelDirect">На головну</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function renderAuth(){
+  return '<div class="card">' +
+    '<h2>Вхід у систему</h2>' +
+    '<p class="muted">Оберіть свою роль та вкажіть ім’я. Платформа працює повністю автономно на будь-якому пристрої та хостингу.</p>' +
+    '<div style="margin-top:12px">' +
+      '<label class="f" for="authName">Ваше ім’я та прізвище</label>' +
+      '<input id="authName" type="text" placeholder="Наприклад: Іваненко Марія">' +
+    '</div>' +
+    '<div class="row" style="margin-top:14px">' +
+      '<button class="btn primary" data-a="loginRole" data-role="teacher">Я — Вчитель</button>' +
+      '<button class="btn" data-a="loginRole" data-role="student">Я — Учень</button>' +
+    '</div>' +
+    '<hr style="border:0;border-top:1px solid var(--line);margin:16px 0">' +
+    '<label class="f" for="quickCode">Або відкрийте тест за посиланням / кодом:</label>' +
+    '<div class="row">' +
+      '<input id="quickCode" type="text" placeholder="Вставте посилання або код тесту" style="flex:1">' +
+      '<button class="btn" data-a="openQuickCode">Відкрити</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function renderShareModal(){
+  var t = shareModal;
+  var link = makeTestLink(t);
+  var shareMsg = encodeURIComponent('Пройдіть тест «' + t.title + '» за посиланням:\n' + link);
+  var tgUrl = 'https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + encodeURIComponent('Тест: ' + t.title);
+  var viberUrl = 'viber://forward?text=' + shareMsg;
+
+  return '<div class="card" style="border:2px solid var(--accent)">' +
+    '<div class="row between">' +
+      '<h2>Поширити тест: ' + esc(t.title) + '</h2>' +
+      '<button class="btn small" data-a="closeShare">Закрити</button>' +
+    '</div>' +
+    '<p class="muted">Покажіть учням QR-код на екрані або надішліть посилання у месенджер:</p>' +
+    '<div id="qrBox" class="qr-wrap"></div>' +
+    '<div class="row" style="justify-content:center;margin-bottom:10px">' +
+      '<button class="btn primary" data-a="copyLink">Копіювати посилання</button>' +
+      '<a class="btn tg" href="' + tgUrl + '" target="_blank" rel="noopener">Telegram</a>' +
+      '<a class="btn viber" href="' + viberUrl + '">Viber</a>' +
+      '<button class="btn" data-a="copyCode">Код: ' + esc(t.code) + '</button>' +
+    '</div>' +
+    '<div class="code-box">' +
+      '<div class="muted" style="font-size:.8rem;font-weight:700;margin-bottom:4px">Пряме посилання:</div>' +
+      '<div style="font-size:.82rem;max-height:60px;overflow-y:auto">' + esc(link) + '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function mountQrIfNeeded(){
+  var box = document.getElementById('qrBox');
+  if(!box || !shareModal) return;
+  box.innerHTML = '';
+  var link = makeTestLink(shareModal);
+  if(typeof QRCode !== 'undefined' && link.length <= 2200){
+    try{
+      new QRCode(box, {
+        text: link,
+        width: 180,
+        height: 180,
+        colorDark: '#1c2740',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.L
+      });
+    }catch(e){
+      box.innerHTML = '<div class="muted" style="font-size:.85rem">Тест завеликий для QR-коду — скопіюйте пряме посилання нижче.</div>';
+    }
+  } else {
+    box.innerHTML = '<div class="muted" style="font-size:.85rem">Скопіюйте пряме посилання для учнів нижче.</div>';
+  }
+}
+
+function renderRun(){
+  var t = run.test;
+  var totalQ = run.questions.length;
+
+  if(run.done){
+    var pct = run.totalPoints ? Math.round((run.score / run.totalPoints) * 100) : 0;
+    var mark12 = Math.max(1, Math.round((run.score / (run.totalPoints || 1)) * 12));
+    var h = '<div class="card">' +
+      '<div class="muted">Результат тесту · ' + esc(run.studentName) + '</div>' +
+      '<div class="score">' + run.score + ' з ' + run.totalPoints + ' балів (' + pct + '%)</div>' +
+      '<div class="muted" style="margin-bottom:10px">Орієнтовна оцінка за 12-бальною шкалою: <b>' + mark12 + ' балів</b></div>' +
+      '<div class="code-box">' +
+        '<div style="font-weight:700;font-size:.9rem;margin-bottom:4px">Код результату для вчителя:</div>' +
+        '<div class="muted" style="font-size:.82rem;margin-bottom:8px">Скопіюйте цей код та надішліть вчителю у Viber / Telegram:</div>' +
+        '<div style="font-size:.8rem;max-height:60px;overflow-y:auto;margin-bottom:8px">' + esc(run.resultCode) + '</div>' +
+        '<div class="row">' +
+          '<button class="btn primary small" data-a="copyResCode">Скопіювати код результату</button>' +
+          '<a class="btn tg small" href="https://t.me/share/url?url=' + encodeURIComponent(run.resultCode) + '&text=' + encodeURIComponent('Результат тесту «' + t.title + '» — ' + run.studentName) + '" target="_blank" rel="noopener">У Telegram</a>' +
+        '</div>' +
+      '</div>' +
+      '<div class="row" style="margin-top:14px">' +
+        '<button class="btn primary" data-a="exitRun">Завершити</button>' +
+      '</div>' +
+    '</div>';
+
+    run.questions.forEach(function(q, qi){
+      var ans = run.answers[qi];
+      var pts = Math.max(0.1, parseFloat(q.points) || 1);
+      var earned = getQuestionEarnedPoints(q, ans);
+      var isFull = earned >= pts;
+      var isPartial = earned > 0 && earned < pts;
+      var pillCls = isFull ? 'ok' : (isPartial ? 'info' : '');
+      var pillText = isFull
+        ? ('+' + earned + ' б. · Правильно')
+        : (isPartial ? ('+' + earned + ' з ' + pts + ' б. · Частково') : ('0/' + pts + ' б. · Помилка'));
+
+      h += '<div class="card q-card">' +
+        '<div class="row between" style="margin-bottom:6px">' +
+          '<b>' + (qi + 1) + '. ' + esc(q.text) + '</b>' +
+          '<span class="pill ' + pillCls + '">' + pillText + '</span>' +
+        '</div>';
+
+      if(q.type === 'text'){
+        h += '<div class="choice ' + (isFull ? 'ok' : 'bad') + '" style="cursor:default">' +
+          '<span>Ваша відповідь: <b>' + esc(ans || '(не вказано)') + '</b></span>' +
+        '</div>';
+      } else if(q.type === 'multi'){
+        var pickedArr = Array.isArray(ans) ? ans : [];
+        q.options.forEach(function(opt, oi){
+          var isPick = pickedArr.indexOf(oi) !== -1;
+          h += '<div class="choice" style="cursor:default">' +
+            '<span>' + (isPick ? '✓' : '•') + '</span>' +
+            '<span>' + esc(opt) + (isPick ? ' <span class="muted">(ваш вибір)</span>' : '') + '</span>' +
+          '</div>';
+        });
+      } else {
+        q.options.forEach(function(opt, oi){
+          var isPick = oi === ans;
+          h += '<div class="choice" style="cursor:default">' +
+            '<span>' + (isPick ? '✓' : '•') + '</span>' +
+            '<span>' + esc(opt) + (isPick ? ' <span class="muted">(ваш вибір)</span>' : '') + '</span>' +
+          '</div>';
+        });
+      }
+
+      if(q.explanation){
+        h += '<div class="exp-box">💡 <b>Пояснення:</b> ' + esc(q.explanation) + '</div>';
+      }
+      h += '</div>';
+    });
+    return h;
+  }
+
+  var idx = run.curr || 0;
+  var q = run.questions[idx];
+  var answeredCount = run.questions.filter(function(item, i){ return isQuestionAnswered(item, run.answers[i]); }).length;
+  var pctDone = Math.round(((idx + 1) / totalQ) * 100);
+
+  var out = '';
+  if(run.leftSec > 0){
+    out += '<div id="timerBar" class="timer-bar' + (run.leftSec <= 30 ? ' warn' : '') + '">' +
+      '<span>Залишилось часу:</span>' +
+      '<span id="timerVal" class="timer-val">' + fmtTime(run.leftSec) + '</span>' +
+    '</div>';
+  }
+
+  if(pendingLeave){
+    out += '<div class="err">' +
+      '<div>Вийти з тесту? Поточні відповіді буде втрачено.</div>' +
+      '<div class="row" style="margin-top:8px">' +
+        '<button class="btn danger small" data-a="confirmLeave">Так, вийти</button>' +
+        '<button class="btn small" data-a="cancelLeave">Продовжити тест</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  out += '<div class="card">' +
+    '<div class="row between">' +
+      '<div>' +
+        '<div class="muted" style="font-size:.82rem">' + esc(t.title) + ' · ' + esc(run.studentName) + '</div>' +
+        '<div style="font-weight:800;font-size:1.05rem">Питання ' + (idx + 1) + ' з ' + totalQ + '</div>' +
+      '</div>' +
+      '<button class="btn small" data-a="askLeave">Вийти</button>' +
+    '</div>' +
+    '<div class="prog-wrap"><div class="prog-fill" style="width:' + pctDone + '%"></div></div>' +
+    '<div class="muted" style="font-size:.82rem">Відповідей надано: ' + answeredCount + ' з ' + totalQ + '</div>' +
+  '</div>';
+
+  var typeBadge = q.type === 'multi' ? 'Кілька правильних відповідей' : (q.type === 'text' ? 'Відкрита відповідь' : 'Одна правильна відповідь');
+  out += '<div class="card q-card">' +
+    '<div class="row between" style="margin-bottom:8px">' +
+      '<span class="pill info">' + typeBadge + '</span>' +
+      '<span class="muted" style="font-size:.85rem"><b>' + (q.points || 1) + '</b> балів</span>' +
+    '</div>' +
+    '<div style="font-weight:700;font-size:1.08rem;margin-bottom:10px">' + (idx + 1) + '. ' + esc(q.text) + '</div>';
+
+  if(q.type === 'text'){
+    out += '<label class="f" for="runTextAns">Введіть вашу відповідь:</label>' +
+      '<input id="runTextAns" type="text" data-runtext="' + idx + '" placeholder="Напишіть слово або число..." value="' + esc(run.answers[idx] || '') + '">';
+  } else if(q.type === 'multi'){
+    var selArr = Array.isArray(run.answers[idx]) ? run.answers[idx] : [];
+    q.options.forEach(function(opt, oi){
+      var checked = selArr.indexOf(oi) !== -1;
+      out += '<label class="choice' + (checked ? ' sel' : '') + '" data-a="toggleMultiAns" data-qi="' + idx + '" data-oi="' + oi + '">' +
+        '<input type="checkbox" ' + (checked ? 'checked' : '') + '>' +
+        '<span>' + esc(opt) + '</span>' +
+      '</label>';
+    });
+  } else {
+    q.options.forEach(function(opt, oi){
+      var checked = run.answers[idx] === oi;
+      out += '<label class="choice' + (checked ? ' sel' : '') + '" data-a="pickAns" data-qi="' + idx + '" data-oi="' + oi + '">' +
+        '<input type="radio" name="q_curr" ' + (checked ? 'checked' : '') + '>' +
+        '<span>' + esc(opt) + '</span>' +
+      '</label>';
+    });
+  }
+  out += '</div>';
+
+  out += '<div class="card">' +
+    '<div class="row between">' +
+      '<button class="btn" data-a="prevQ"' + (idx === 0 ? ' disabled style="opacity:.45;cursor:not-allowed"' : '') + '>← Назад</button>' +
+      (idx < totalQ - 1
+        ? '<button class="btn primary" data-a="nextQ">Далі →</button>'
+        : '<button class="btn primary" data-a="finishTest">Завершити тест ✓</button>') +
+    '</div>' +
+    '<div class="q-dots">';
+  for(var d = 0; d < totalQ; d++){
+    var dCls = 'q-dot' + (d === idx ? ' cur' : '');
+    out += '<button type="button" class="' + dCls + '" data-a="jumpQ" data-qi="' + d + '">' + (d + 1) + '</button>';
+  }
+  out += '</div></div>';
+
+  return out;
+}
+
+function renderEditor(){
+  var totalPts = draft.questions.reduce(function(s, q){ return s + (Math.max(0.1, parseFloat(q.points) || 1)); }, 0);
+  var h = '<div class="card">' +
+    '<div class="row between" style="margin-bottom:10px">' +
+      '<h2>' + (draft.id ? 'Редагування тесту' : 'Новий тест') + '</h2>' +
+      '<div class="row">' +
+        '<button class="btn small" data-a="aiGenModal" title="Автоматично створити тест за допомогою ШІ">✨ ШІ-помічник</button>' +
+        '<button class="btn small" data-a="printDraft" title="Роздрукувати або зберегти як Word/PDF">🖨️ Роздрукувати / у Word</button>' +
+        '<button class="btn small" data-a="cancelDraft">Скасувати</button>' +
+      '</div>' +
+    '</div>' +
+    '<label class="f" for="dTitle">Назва тесту</label>' +
+    '<input id="dTitle" type="text" placeholder="Наприклад: Історія України. 8 клас" value="' + esc(draft.title) + '">' +
+    '<div style="margin-top:10px">' +
+      '<label class="f" for="dDesc">Опис або інструкція (необов’язково)</label>' +
+      '<textarea id="dDesc" placeholder="Короткі вказівки для учнів...">' + esc(draft.description) + '</textarea>' +
+    '</div>' +
+    '<div class="row" style="margin-top:12px;justify-content:space-between">' +
+      '<div>' +
+        '<label class="f" for="dTime">Ліміт часу (хв, 0 = без ліміту)</label>' +
+        '<input id="dTime" type="number" min="0" max="180" value="' + (draft.timeLimit || 0) + '">' +
+      '</div>' +
+      '<div class="muted">Всього питань: <b>' + draft.questions.length + '</b> · Макс. балів: <b>' + Math.round(totalPts * 100) / 100 + '</b></div>' +
+    '</div>' +
+    '<label class="chk-row">' +
+      '<input id="dShuf" type="checkbox" ' + (draft.shuffle ? 'checked' : '') + '>' +
+      '<span>Перемішувати порядок питань для кожного учня</span>' +
+    '</label>' +
+  '</div>';
+
+  draft.questions.forEach(function(q, qi){
+    h += '<div class="card q-card">' +
+      '<div class="row between" style="margin-bottom:8px">' +
+        '<b>Питання №' + (qi + 1) + '</b>' +
+        (draft.questions.length > 1
+          ? '<button class="btn danger small" data-a="delQ" data-qi="' + qi + '">Видалити</button>'
+          : '') +
+      '</div>' +
+      '<div class="q-meta-grid">' +
+        '<div>' +
+          '<label class="f">Тип питання</label>' +
+          '<select data-qtype="' + qi + '">' +
+            '<option value="single"' + (q.type === 'single' ? ' selected' : '') + '>Одна правильна відповідь</option>' +
+            '<option value="multi"' + (q.type === 'multi' ? ' selected' : '') + '>Кілька правильних відповідей</option>' +
+            '<option value="text"' + (q.type === 'text' ? ' selected' : '') + '>Відкрита відповідь (текст/число)</option>' +
+          '</select>' +
+        '</div>' +
+        '<div>' +
+          '<label class="f">Бали (напр. 0.5, 1)</label>' +
+          '<input type="number" step="0.1" min="0.1" max="50" data-qpts="' + qi + '" value="' + (q.points !== undefined && q.points !== '' ? q.points : 1) + '">' +
+        '</div>' +
+      '</div>' +
+      '<input type="text" data-qtext="' + qi + '" placeholder="Введіть текст питання..." value="' + esc(q.text) + '">';
+
+    if(q.type === 'text'){
+      h += '<div style="margin-top:10px">' +
+        '<label class="f">Правильна відповідь (синоніми через |, напр.: 4|чотири)</label>' +
+        '<input type="text" data-qctext="' + qi + '" placeholder="Введіть точну відповідь..." value="' + esc(q.correctText || '') + '">' +
+      '</div>';
+    } else if(q.type === 'multi'){
+      var mArr = Array.isArray(q.answerIndices) ? q.answerIndices : [];
+      q.options.forEach(function(opt, oi){
+        h += '<div class="opt">' +
+          '<input type="checkbox" data-a="toggleMultiAnsDraft" data-qi="' + qi + '" data-oi="' + oi + '" ' + (mArr.indexOf(oi) !== -1 ? 'checked' : '') + ' title="Позначити як правильну відповідь">' +
+          '<input type="text" data-qopt="' + qi + ':' + oi + '" placeholder="Варіант ' + (oi + 1) + '" value="' + esc(opt) + '">' +
+          (q.options.length > 2
+            ? '<button class="btn small" data-a="delOpt" data-qi="' + qi + '" data-oi="' + oi + '" title="Видалити варіант">✕</button>'
+            : '') +
+        '</div>';
+      });
+      h += '<div class="row" style="margin-top:10px">' +
+        '<button class="btn small" data-a="addOpt" data-qi="' + qi + '">+ Варіант відповіді</button>' +
+      '</div>';
+    } else {
+      q.options.forEach(function(opt, oi){
+        h += '<div class="opt">' +
+          '<input type="radio" name="ans_' + qi + '" data-a="setAns" data-qi="' + qi + '" data-oi="' + oi + '" ' + (q.answerIndex === oi ? 'checked' : '') + ' title="Позначити як правильну відповідь">' +
+          '<input type="text" data-qopt="' + qi + ':' + oi + '" placeholder="Варіант ' + (oi + 1) + '" value="' + esc(opt) + '">' +
+          (q.options.length > 2
+            ? '<button class="btn small" data-a="delOpt" data-qi="' + qi + '" data-oi="' + oi + '" title="Видалити варіант">✕</button>'
+            : '') +
+        '</div>';
+      });
+      h += '<div class="row" style="margin-top:10px">' +
+        '<button class="btn small" data-a="addOpt" data-qi="' + qi + '">+ Варіант відповіді</button>' +
+      '</div>';
+    }
+
+    h += '<div style="margin-top:10px">' +
+      '<input type="text" data-qexp="' + qi + '" placeholder="Пояснення для учня після тесту (необов’язково)..." value="' + esc(q.explanation || '') + '">' +
+    '</div></div>';
+  });
+
+  h += '<div class="row between">' +
+    '<button class="btn" data-a="addQ">+ Додати питання</button>' +
+    '<button class="btn primary" data-a="saveDraft">Зберегти тест</button>' +
+  '</div>';
+  return h;
+}
+
+function renderAiModal(){
+  return '<div class="card" style="border:2px solid var(--accent)">' +
+    '<div class="row between">' +
+      '<h2>✨ ШІ-помічник генерації тестів</h2>' +
+      '<button class="btn small" data-a="closeAiModal">Закрити</button>' +
+    '</div>' +
+    '<p class="muted">Введіть тему, клас та бажану кількість питань (наприклад: <i>«Таблиця множення на 7, 3 клас, 5 питань»</i> або <i>«Клітина рослин, 6 клас, 4 питання»</i>):</p>' +
+    '<div style="margin-top:12px">' +
+      '<label class="f" for="aiPromptInp">Тема та опис тесту</label>' +
+      '<textarea id="aiPromptInp" placeholder="Наприклад: Видатні українські письменники, 9 клас, 5 питань..."></textarea>' +
+    '</div>' +
+    '<div class="row" style="margin-top:14px">' +
+      '<button class="btn primary" data-a="runAiGen">Згенерувати тест</button>' +
+      '<button class="btn" data-a="closeAiModal">Скасувати</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function teacherTests(){
+  var myTests = tests.filter(function(t){ return !t.ownerId || t.ownerId === uid; });
+  var h = '<div class="card">' +
+    '<div class="row between">' +
+      '<div>' +
+        '<h2>Мої тести (' + myTests.length + ')</h2>' +
+        '<div class="muted">Створюйте тести, діліться QR-кодами та посиланнями з учнями</div>' +
+      '</div>' +
+      '<button class="btn primary" data-a="newTest">+ Створити тест</button>' +
+    '</div>';
+
+  if(!myTests.length){
+    h += '<div class="empty">У вас ще немає створених тестів. Натисніть «+ Створити тест», щоб почати.</div>';
+  } else {
+    myTests.forEach(function(t){
+      var maxPts = getTestMaxPoints(t);
+      h += '<div class="list-item">' +
+        '<div>' +
+          '<div style="font-weight:700;font-size:1.05rem">' + esc(t.title) + '</div>' +
+          '<div class="muted">Код: <b>' + esc(t.code) + '</b> · Питань: ' + (t.questions ? t.questions.length : 0) + ' (' + maxPts + ' б.)' +
+            (t.timeLimit > 0 ? ' · ' + t.timeLimit + ' хв' : '') + '</div>' +
+        '</div>' +
+        '<div class="row">' +
+          '<button class="btn primary small" data-a="shareTest" data-id="' + esc(t.id) + '">QR / Посилання</button>' +
+          '<button class="btn small" data-a="editTest" data-id="' + esc(t.id) + '">Змінити</button>' +
+          '<button class="btn small" data-a="tryTest" data-id="' + esc(t.id) + '">Пройти</button>' +
+          '<button class="btn danger small" data-a="askDel" data-id="' + esc(t.id) + '">✕</button>' +
+        '</div>' +
+      '</div>';
+
+      if(pendingDel === t.id){
+        h += '<div class="err" style="margin-top:8px">' +
+          '<div>Видалити тест «' + esc(t.title) + '»?</div>' +
+          '<div class="row" style="margin-top:8px">' +
+            '<button class="btn danger small" data-a="confirmDel" data-id="' + esc(t.id) + '">Так, видалити</button>' +
+            '<button class="btn small" data-a="cancelDel">Скасувати</button>' +
+          '</div>' +
+        '</div>';
+      }
+    });
+  }
+  h += '</div>';
+
+  h += '<div class="card">' +
+    '<h2>Резервна копія тестів</h2>' +
+    '<p class="muted">Збережіть усі свої тести в один файл, щоб перенести їх на інший телефон або комп’ютер.</p>' +
+    '<div class="row">' +
+      '<button class="btn small" data-a="backupExport">Завантажити базу (.json)</button>' +
+      '<label class="btn small" style="cursor:pointer;margin:0">' +
+        'Відновити з файлу' +
+        '<input type="file" id="backupFileInp" accept=".json,application/json" style="display:none">' +
+      '</label>' +
+    '</div>' +
+  '</div>';
+  return h;
+}
+
+function teacherResults(){
+  var h = '<div class="card">' +
+    '<h2>Додати результат учня</h2>' +
+    '<p class="muted">Вставте код результату (<code>RES-...</code>), який надіслав учень після проходження тесту:</p>' +
+    '<div class="row">' +
+      '<input id="resCodeInp" type="text" placeholder="Вставте код RES-..." style="flex:1">' +
+      '<button class="btn primary" data-a="importRes">Додати</button>' +
+    '</div>' +
+  '</div>';
+
+  var uniqueTitles = [];
+  allResults.forEach(function(r){
+    if(r.testTitle && uniqueTitles.indexOf(r.testTitle) === -1) uniqueTitles.push(r.testTitle);
+  });
+
+  var filtered = resFilterTest === 'ALL'
+    ? allResults
+    : allResults.filter(function(r){ return r.testTitle === resFilterTest; });
+
+  var avgPct = 0;
+  var bestPct = 0;
+  if(filtered.length){
+    var sumP = 0;
+    filtered.forEach(function(r){
+      var p = r.total ? Math.round((r.score / r.total) * 100) : 0;
+      sumP += p;
+      if(p > bestPct) bestPct = p;
+    });
+    avgPct = Math.round(sumP / filtered.length);
+  }
+
+  h += '<div class="card">' +
+    '<div class="row between" style="margin-bottom:10px">' +
+      '<h2>Журнал результатів (' + filtered.length + ')</h2>' +
+      (filtered.length ? '<button class="btn small" data-a="exportCsv">Завантажити CSV</button>' : '') +
+    '</div>';
+
+  if(uniqueTitles.length > 1){
+    h += '<div style="margin-bottom:12px">' +
+      '<label class="f" for="resFilterSel">Фільтр за тестом:</label>' +
+      '<select id="resFilterSel">' +
+        '<option value="ALL"' + (resFilterTest === 'ALL' ? ' selected' : '') + '>Усі тести (' + allResults.length + ')</option>';
+    uniqueTitles.forEach(function(title){
+      h += '<option value="' + esc(title) + '"' + (resFilterTest === title ? ' selected' : '') + '>' + esc(title) + '</option>';
+    });
+    h += '</select></div>';
+  }
+
+  if(filtered.length){
+    h += '<div class="stat-grid">' +
+      '<div class="stat-box"><div class="muted" style="font-size:.82rem">Здано робіт</div><div class="stat-num">' + filtered.length + '</div></div>' +
+      '<div class="stat-box"><div class="muted" style="font-size:.82rem">Середній бал</div><div class="stat-num">' + avgPct + '%</div></div>' +
+      '<div class="stat-box"><div class="muted" style="font-size:.82rem">Найкращий результат</div><div class="stat-num">' + bestPct + '%</div></div>' +
+    '</div>';
+  }
+
+  if(!filtered.length){
+    h += '<div class="empty">Поки що немає результатів.</div>';
+  } else {
+    h += '<div class="scroll"><table class="tbl"><thead><tr>' +
+      '<th>Учень</th><th>Тест</th><th>Бали</th><th>Відсоток</th><th>Оцінка (12)</th><th>Дата</th>' +
+    '</tr></thead><tbody>';
+    filtered.forEach(function(r){
+      var pct = r.total ? Math.round((r.score / r.total) * 100) : 0;
+      var m12 = Math.max(1, Math.round((r.score / (r.total || 1)) * 12));
+      var d = r.submittedAt ? new Date(r.submittedAt).toLocaleString('uk-UA', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '';
+      h += '<tr>' +
+        '<td><b>' + esc(r.studentName) + '</b></td>' +
+        '<td>' + esc(r.testTitle) + '</td>' +
+        '<td>' + r.score + ' / ' + r.total + '</td>' +
+        '<td><span class="pill ' + (pct >= 60 ? 'ok' : '') + '">' + pct + '%</span></td>' +
+        '<td><b>' + m12 + '</b></td>' +
+        '<td class="muted">' + esc(d) + '</td>' +
+      '</tr>';
+    });
+    h += '</tbody></table></div>';
+  }
+  h += '</div>';
+  return h;
+}
+
+function renderStudent(){
+  var h = '<div class="card">' +
+    '<h2>Відкрити тест</h2>' +
+    '<p class="muted">Вставте посилання від вчителя або введіть код тесту:</p>' +
+    '<div class="row">' +
+      '<input id="stuCodeInp" type="text" placeholder="Посилання або код тесту" style="flex:1">' +
+      '<button class="btn primary" data-a="openStuTest">Почати</button>' +
+    '</div>' +
+  '</div>';
+
+  if(tests.length){
+    h += '<div class="card"><h2>Доступні тести на пристрої</h2>';
+    tests.forEach(function(t){
+      var prev = myRes[t.id];
+      h += '<div class="list-item">' +
+        '<div>' +
+          '<div style="font-weight:700">' + esc(t.title) + '</div>' +
+          '<div class="muted">Питань: ' + (t.questions ? t.questions.length : 0) +
+            (prev ? ' · Останній результат: <b>' + prev.score + '/' + prev.total + '</b>' : '') +
+          '</div>' +
+        '</div>' +
+        '<button class="btn primary small" data-a="tryTest" data-id="' + esc(t.id) + '">' + (prev ? 'Пройти знову' : 'Пройти') + '</button>' +
+      '</div>';
+    });
+    h += '</div>';
+  }
+  return h;
+}
+
+function render(){
+  var out = '';
+  if(notice){
+    out += '<div class="' + (notice.err ? 'err' : 'good') + '">' + esc(notice.text) + '</div>';
+  }
+
+  if(run){
+    app.innerHTML = out + renderRun();
+    return;
+  }
+
+  if(directTest){
+    app.innerHTML = out + renderDirectStart();
+    return;
+  }
+
+  if(!profile){
+    app.innerHTML = out + renderAuth();
+    return;
+  }
+
+  out += '<div class="card" style="padding:12px 16px">' +
+    '<div class="row between">' +
+      '<div>' +
+        '<b>' + esc(profile.name) + '</b> ' +
+        '<span class="muted">(' + (profile.role === 'teacher' ? 'Вчитель' : 'Учень') + ')</span>' +
+      '</div>' +
+      '<div class="row">' +
+        (profile.role === 'teacher'
+          ? '<button class="btn small" data-a="toggleKey">' + (showKeyBox ? 'Сховати ключ' : 'Ключ вчителя') + '</button>'
+          : '') +
+        '<button class="btn small" data-a="logout">Змінити роль</button>' +
+      '</div>' +
+    '</div>';
+
+  if(profile.role === 'teacher' && showKeyBox){
+    out += '<div class="code-box" style="margin-top:10px">' +
+      '<div class="muted" style="font-size:.85rem">Ваш персональний ключ вчителя:</div>' +
+      '<div class="row between" style="margin-top:4px">' +
+        '<b style="font-size:1.1rem">' + esc(profile.teacherKey) + '</b>' +
+        '<button class="btn small" data-a="copyTKey">Скопіювати</button>' +
+      '</div>' +
+    '</div>';
+  }
+  out += '</div>';
+
+  if(shareModal){
+    out += renderShareModal();
+  }
+
+  if(profile.role === 'teacher'){
+    if(draft){
+      out += renderEditor();
+    } else {
+      out += '<div class="tabs" style="margin-bottom:12px">' +
+        '<button class="tab" aria-selected="' + (tab === 'tests') + '" data-a="tab" data-tab="tests">Мої тести</button>' +
+        '<button class="tab" aria-selected="' + (tab === 'results') + '" data-a="tab" data-tab="results">Результати (' + allResults.length + ')</button>' +
+      '</div>';
+      out += (tab === 'results' ? teacherResults() : teacherTests());
+    }
+  } else {
+    out += renderStudent();
+  }
+
+  app.innerHTML = out;
+  mountQrIfNeeded();
+}
+
+app.addEventListener('input', function(e){
+  var t = e.target;
+  if(run && !run.done && t.dataset.runtext !== undefined){
+    var rIdx = parseInt(t.dataset.runtext, 10);
+    run.answers[rIdx] = t.value;
+    return;
+  }
+  if(!draft) return;
+  if(t.id === 'dTitle') draft.title = t.value;
+  else if(t.id === 'dDesc') draft.description = t.value;
+  else if(t.id === 'dTime') draft.timeLimit = parseInt(t.value, 10) || 0;
+  else if(t.dataset.qtext !== undefined){
+    draft.questions[parseInt(t.dataset.qtext, 10)].text = t.value;
+  } else if(t.dataset.qpts !== undefined){
+    var val = parseFloat(t.value);
+    draft.questions[parseInt(t.dataset.qpts, 10)].points = (isNaN(val) || val <= 0) ? 1 : val;
+  } else if(t.dataset.qctext !== undefined){
+    draft.questions[parseInt(t.dataset.qctext, 10)].correctText = t.value;
+  } else if(t.dataset.qexp !== undefined){
+    draft.questions[parseInt(t.dataset.qexp, 10)].explanation = t.value;
+  } else if(t.dataset.qopt !== undefined){
+    var parts = t.dataset.qopt.split(':');
+    draft.questions[parseInt(parts[0], 10)].options[parseInt(parts[1], 10)] = t.value;
+  }
+});
+
+app.addEventListener('change', function(e){
+  var t = e.target;
+  if(t.id === 'resFilterSel'){
+    resFilterTest = t.value;
+    render();
+    return;
+  }
+  if(t.id === 'backupFileInp' && t.files && t.files[0]){
+    var reader = new FileReader();
+    reader.onload = function(ev){
+      try{
+        var data = JSON.parse(ev.target.result);
+        if(data && Array.isArray(data.tests)){
+          var added = 0;
+          data.tests.forEach(function(item){
+            if(item && item.title && Array.isArray(item.questions)){
+              item.ownerId = uid;
+              item.questions = item.questions.map(normalizeQuestion);
+              if(!tests.some(function(x){ return x.id === item.id; })){
+                tests.unshift(item);
+                added++;
+              }
+            }
+          });
+          if(Array.isArray(data.results)){
+            data.results.forEach(function(r){
+              if(r && r.studentName && !allResults.some(function(x){ return x.id === r.id; })){
+                allResults.push(r);
+              }
+            });
+          }
+          saveStorage();
+          showMsg('Успішно імпортовано тестів: ' + added + '!');
+        } else {
+          showMsg('Невірний формат файлу резервної копії.', true);
+        }
+      }catch(err){
+        showMsg('Не вдалося прочитати файл.', true);
+      }
+    };
+    reader.readAsText(t.files[0]);
+    return;
+  }
+  if(!draft) return;
+  if(t.id === 'dShuf'){
+    draft.shuffle = t.checked;
+  } else if(t.dataset.qtype !== undefined){
+    var qi = parseInt(t.dataset.qtype, 10);
+    draft.questions[qi].type = t.value;
+    if(t.value === 'multi' && !Array.isArray(draft.questions[qi].answerIndices)){
+      draft.questions[qi].answerIndices = [draft.questions[qi].answerIndex || 0];
+    }
+    render();
+  }
+});
+
+app.addEventListener('click', function(e){
+  var el = e.target.closest('[data-a]');
+  if(!el) return;
+  var a = el.dataset.a;
+
+  if(a === 'loginRole'){
+    var nameInp = document.getElementById('authName');
+    var nm = nameInp ? nameInp.value.trim() : '';
+    if(!nm){ showMsg('Введіть ваше ім’я та прізвище.', true); return; }
+    var role = el.dataset.role;
+    profile = {
+      name: nm,
+      role: role,
+      teacherKey: role === 'teacher' ? genTeacherKey() : ''
+    };
+    saveStorage();
+    render();
+    return;
+  }
+
+  if(a === 'openQuickCode'){
+    var qInp = document.getElementById('quickCode');
+    var found = parseTestFromInput(qInp ? qInp.value : '');
+    if(!found){
+      showMsg('Тест не знайдено. Перевірте посилання або код.', true);
+      return;
+    }
+    directTest = found;
+    render();
+    return;
+  }
+
+  if(a === 'beginDirect'){
+    var dn = document.getElementById('directName');
+    var sName = dn ? dn.value.trim() : '';
+    if(!sName){ showMsg('Введіть ваше прізвище та ім’я перед початком.', true); return; }
+    if(!profile){
+      profile = {name: sName, role: 'student', teacherKey: ''};
+      saveStorage();
+    }
+    var target = directTest;
+    directTest = null;
+    startRun(target, sName);
+    return;
+  }
+
+  if(a === 'cancelDirect'){
+    directTest = null;
+    render();
+    return;
+  }
+
+  if(a === 'logout'){
+    profile = null;
+    draft = null;
+    shareModal = null;
+    saveStorage();
+    render();
+    return;
+  }
+
+  if(a === 'toggleKey'){
+    showKeyBox = !showKeyBox;
+    render();
+    return;
+  }
+
+  if(a === 'copyTKey'){
+    if(profile && profile.teacherKey) copyText(profile.teacherKey, 'Ключ вчителя скопійовано!');
+    return;
+  }
+
+  if(a === 'tab'){
+    tab = el.dataset.tab;
+    render();
+    return;
+  }
+
+  if(a === 'newTest'){
+    shareModal = null;
+    newDraft(null);
+    render();
+    return;
+  }
+
+  if(a === 'aiGenModal'){
+    var existingModal = document.getElementById('aiGenWrap');
+    if(existingModal) existingModal.remove();
+    var modalDiv = document.createElement('div');
+    modalDiv.id = 'aiGenWrap';
+    modalDiv.innerHTML = renderAiModal();
+    app.prepend(modalDiv);
+    window.scrollTo({top: 0, behavior: 'smooth'});
+    return;
+  }
+
+  if(a === 'closeAiModal'){
+    var m = document.getElementById('aiGenWrap');
+    if(m) m.remove();
+    return;
+  }
+
+  if(a === 'runAiGen'){
+    var promptInp = document.getElementById('aiPromptInp');
+    var promptText = promptInp ? promptInp.value.trim() : '';
+    if(!promptText){
+      showMsg('Будь ласка, введіть тему тесту для генерації.', true);
+      return;
+    }
+    showMsg('🤖 ШІ генерує унікальні запитання через Gemini API, зачекайте кілька секунд...');
+
+    var sysPrompt = 'Ти професійний вчитель та методист. Створи тест українською мовою на задану тему у форматі чинного JSON масиву. Поверни ВИКЛЮЧНО валідний JSON-об\'єкт без жодних додаткових пояснень чи тексту поруч (без маркування markdown), із такою структурою:\n' +
+      '{\n  "title": "Назва тесту",\n  "description": "Короткий опис",\n  "questions": [\n    {\n      "type": "single",\n      "text": "Текст питання",\n      "options": ["варіант 1", "варіант 2", "варіант 3", "варіант 4"],\n      "answerIndex": 0,\n      "explanation": "Пояснення правильної відповіді"\n    }\n  ]\n}';
+
+    var apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent';
+    var payload = {
+      contents: [{ parts: [{ text: 'Згенеруй детальний тест з теми: ' + promptText }] }],
+      systemInstruction: { parts: [{ text: sysPrompt }] },
+      generationConfig: { responseMimeType: 'application/json' }
+    };
+
+    fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    .then(function(res){ return res.json(); })
+    .then(function(data){
+      var candidate = data.candidates && data.candidates[0];
+      var rawJson = candidate && candidate.content && candidate.content.parts && candidate.content.parts[0] && candidate.content.parts[0].text;
+      if(!rawJson) throw new Error('Пуста відповідь ШІ');
+      
+      // Очищення від можливих зайвих маркерів
+      rawJson = rawJson.replace(/```json/g, '').replace(/```/g, '').trim();
+      var parsed = JSON.parse(rawJson);
+
+      if(parsed && parsed.title) draft.title = parsed.title;
+      else draft.title = promptText;
+
+      if(parsed && parsed.description) draft.description = parsed.description;
+      else draft.description = 'Тест з теми: ' + promptText;
+
+      if(parsed && Array.isArray(parsed.questions) && parsed.questions.length > 0){
+        draft.questions = parsed.questions.map(function(q){
+          return normalizeQuestion({
+            type: q.type || 'single',
+            text: q.text || 'Питання',
+            options: Array.isArray(q.options) ? q.options : ['Варіант А', 'Варіант Б'],
+            answerIndex: typeof q.answerIndex === 'number' ? q.answerIndex : 0,
+            points: 1,
+            explanation: q.explanation || ''
+          });
+        });
+      }
+
+      var m = document.getElementById('aiGenWrap');
+      if(m) m.remove();
+      render();
+      showMsg('✨ ШІ успішно створив унікальні запитання спеціально для вашої теми!');
+    })
+    .catch(function(err){
+      showMsg('Не вдалося згенерувати через мережу. Спробуйте ще раз.', true);
+    });
+    return;
+  }
+
+  if(a === 'printDraft'){
+    var title = (draft.title || 'Тест').trim();
+    var desc = (draft.description || '').trim();
+    var printWin = window.open('', '_blank');
+    if(!printWin){
+      showMsg('Дозвольте спливаючі вікна у браузері для друку.', true);
+      return;
+    }
+    var htmlContent = '<html lang="uk"><head><meta charset="utf-8"><title>' + esc(title) + '</title>' +
+      '<style>body{font-family:Arial,sans-serif;line-height:1.6;margin:30px;color:#000;} h1{text-align:center;font-size:18pt;} p{margin:6px 0;} .meta{border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:20px;} .q{margin-bottom:18px;} .opt{margin-left:20px;}</style>' +
+      '</head><body>' +
+      '<div class="meta">' +
+        '<h1>' + esc(title) + '</h1>' +
+        (desc ? '<p><b>Інструкція:</b> ' + esc(desc) + '</p>' : '') +
+        '<p><b>Учень(-ця):</b> ____________________________________ &nbsp;&nbsp;&nbsp; <b>Клас:</b> ________ &nbsp;&nbsp;&nbsp; <b>Дата:</b> ____________</p>' +
+      '</div>';
+
+    draft.questions.forEach(function(q, qi){
+      var pts = Math.max(0.1, parseFloat(q.points) || 1);
+      htmlContent += '<div class="q"><b>' + (qi + 1) + '. ' + esc(q.text) + '</b> <span style="font-size:10pt;color:#555">(' + pts + ' бал.)</span><br>';
+      if(q.type === 'text'){
+        htmlContent += '<div class="opt">Відповідь: ________________________________________________</div>';
+      } else if(Array.isArray(q.options)){
+        q.options.forEach(function(opt, oi){
+          if((opt || '').trim() !== ''){
+            htmlContent += '<div class="opt">&#9633; ' + esc(opt) + '</div>';
+          }
+        });
+      }
+      htmlContent += '</div>';
+    });
+
+    htmlContent += '<script>window.onload = function(){ window.print(); };<\/script></body></html>';
+    printWin.document.write(htmlContent);
+    printWin.document.close();
+    return;
+  }
+
+  if(a === 'editTest'){
+    var et = tests.find(function(x){ return x.id === el.dataset.id; });
+    if(et){ shareModal = null; newDraft(et); render(); }
+    return;
+  }
+
+  if(a === 'cancelDraft'){
+    draft = null;
+    render();
+    return;
+  }
+
+  if(a === 'addQ'){
+    draft.questions.push({
+      type: 'single',
+      text: '',
+      options: ['', '', '', ''],
+      answerIndex: 0,
+      answerIndices: [0],
+      correctText: '',
+      points: 1,
+      explanation: ''
+    });
+    render();
+    return;
+  }
+
+  if(a === 'delQ'){
+    var qIdxDel = parseInt(el.dataset.qi, 10);
+    if(draft.questions.length > 1){
+      draft.questions.splice(qIdxDel, 1);
+      render();
+    }
+    return;
+  }
+
+  if(a === 'addOpt'){
+    var qIdxOpt = parseInt(el.dataset.qi, 10);
+    if(draft.questions[qIdxOpt].options.length < 8){
+      draft.questions[qIdxOpt].options.push('');
+      render();
+    }
+    return;
+  }
+
+  if(a === 'delOpt'){
+    var qiD = parseInt(el.dataset.qi, 10);
+    var oiD = parseInt(el.dataset.oi, 10);
+    var qObj = draft.questions[qiD];
+    if(qObj.options.length > 2){
+      qObj.options.splice(oiD, 1);
+      if(qObj.answerIndex >= qObj.options.length) qObj.answerIndex = 0;
+      if(Array.isArray(qObj.answerIndices)){
+        qObj.answerIndices = qObj.answerIndices
+          .filter(function(x){ return x !== oiD; })
+          .map(function(x){ return x > oiD ? x - 1 : x; });
+      }
+      render();
+    }
+    return;
+  }
+
+  if(a === 'setAns'){
+    var qiA = parseInt(el.dataset.qi, 10);
+    var oiA = parseInt(el.dataset.oi, 10);
+    draft.questions[qiA].answerIndex = oiA;
+    return;
+  }
+
+  if(a === 'toggleMultiAnsDraft'){
+    var qiM = parseInt(el.dataset.qi, 10);
+    var oiM = parseInt(el.dataset.oi, 10);
+    var arr = draft.questions[qiM].answerIndices || [];
+    var pos = arr.indexOf(oiM);
+    if(pos === -1) arr.push(oiM);
+    else arr.splice(pos, 1);
+    draft.questions[qiM].answerIndices = arr;
+    return;
+  }
+
+  if(a === 'saveDraft'){
+    saveDraft();
+    return;
+  }
+
+  if(a === 'shareTest'){
+    var st = tests.find(function(x){ return x.id === el.dataset.id; });
+    if(st){ shareModal = st; render(); window.scrollTo({top: 0, behavior: 'smooth'}); }
+    return;
+  }
+
+  if(a === 'closeShare'){
+    shareModal = null;
+    render();
+    return;
+  }
+
+  if(a === 'copyLink'){
+    if(shareModal) copyText(makeTestLink(shareModal), 'Посилання на тест скопійовано!');
+    return;
+  }
+
+  if(a === 'copyCode'){
+    if(shareModal) copyText(shareModal.code, 'Код тесту скопійовано!');
+    return;
+  }
+
+  if(a === 'askDel'){
+    pendingDel = el.dataset.id;
+    render();
+    return;
+  }
+
+  if(a === 'cancelDel'){
+    pendingDel = null;
+    render();
+    return;
+  }
+
+  if(a === 'confirmDel'){
+    var delId = el.dataset.id;
+    tests = tests.filter(function(x){ return x.id !== delId; });
+    if(shareModal && shareModal.id === delId) shareModal = null;
+    pendingDel = null;
+    saveStorage();
+    showMsg('Тест видалено.');
+    return;
+  }
+
+  if(a === 'backupExport'){
+    var payload = JSON.stringify({
+      exportedAt: new Date().toISOString(),
+      teacher: profile ? profile.name : '',
+      tests: tests.filter(function(t){ return !t.ownerId || t.ownerId === uid; }),
+      results: allResults
+    }, null, 2);
+    var bBlob = new Blob([payload], {type: 'application/json;charset=utf-8;'});
+    var bUrl = URL.createObjectURL(bBlob);
+    var bLink = document.createElement('a');
+    bLink.href = bUrl;
+    bLink.download = 'baza_testiv.json';
+    document.body.appendChild(bLink);
+    bLink.click();
+    document.body.removeChild(bLink);
+    URL.revokeObjectURL(bUrl);
+    showMsg('Файл резервної копії завантажено!');
+    return;
+  }
+
+  if(a === 'tryTest'){
+    var tt = tests.find(function(x){ return x.id === el.dataset.id; });
+    if(tt) startRun(tt, profile ? profile.name : 'Учень');
+    return;
+  }
+
+  if(a === 'openStuTest'){
+    var sInp = document.getElementById('stuCodeInp');
+    var foundT = parseTestFromInput(sInp ? sInp.value : '');
+    if(!foundT){
+      showMsg('Тест не знайдено. Вставте повне посилання від вчителя.', true);
+      return;
+    }
+    if(!tests.some(function(x){ return x.id === foundT.id; })){
+      tests.unshift(foundT);
+      saveStorage();
+    }
+    startRun(foundT, profile ? profile.name : 'Учень');
+    return;
+  }
+
+  if(a === 'pickAns'){
+    var qIdx = parseInt(el.dataset.qi, 10);
+    var oIdx = parseInt(el.dataset.oi, 10);
+    run.answers[qIdx] = oIdx;
+    render();
+    clearTimeout(autoNextTimer);
+    if(run && !run.done && run.curr === qIdx && qIdx < run.questions.length - 1){
+      autoNextTimer = setTimeout(function(){
+        if(run && !run.done && run.curr === qIdx && run.curr < run.questions.length - 1){
+          run.curr++;
+          render();
+          window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+      }, 350);
+    }
+    return;
+  }
+
+  if(a === 'toggleMultiAns'){
+    e.preventDefault();
+    var mqIdx = parseInt(el.dataset.qi, 10);
+    var moIdx = parseInt(el.dataset.oi, 10);
+    var curArr = Array.isArray(run.answers[mqIdx]) ? run.answers[mqIdx].slice() : [];
+    var idxPos = curArr.indexOf(moIdx);
+    if(idxPos === -1) curArr.push(moIdx);
+    else curArr.splice(idxPos, 1);
+    run.answers[mqIdx] = curArr;
+    render();
+    return;
+  }
+
+  if(a === 'prevQ'){
+    clearTimeout(autoNextTimer);
+    if(run && run.curr > 0){
+      run.curr--;
+      render();
+      window.scrollTo({top: 0, behavior: 'smooth'});
+    }
+    return;
+  }
+
+  if(a === 'nextQ'){
+    clearTimeout(autoNextTimer);
+    if(run && run.curr < run.questions.length - 1){
+      run.curr++;
+      render();
+      window.scrollTo({top: 0, behavior: 'smooth'});
+    }
+    return;
+  }
+
+  if(a === 'jumpQ'){
+    clearTimeout(autoNextTimer);
+    var targetQ = parseInt(el.dataset.qi, 10);
+    if(run && targetQ >= 0 && targetQ < run.questions.length){
+      run.curr = targetQ;
+      render();
+      window.scrollTo({top: 0, behavior: 'smooth'});
+    }
+    return;
+  }
+
+  if(a === 'askLeave'){
+    pendingLeave = true;
+    render();
+    return;
+  }
+
+  if(a === 'cancelLeave'){
+    pendingLeave = false;
+    render();
+    return;
+  }
+
+  if(a === 'confirmLeave'){
+    clearInterval(timerInt);
+    clearTimeout(autoNextTimer);
+    run = null;
+    pendingLeave = false;
+    render();
+    return;
+  }
+
+  if(a === 'finishTest'){
+    clearTimeout(autoNextTimer);
+    finishTest(false);
+    return;
+  }
+
+  if(a === 'exitRun'){
+    run = null;
+    render();
+    return;
+  }
+
+  if(a === 'copyResCode'){
+    if(run && run.resultCode) copyText(run.resultCode, 'Код результату скопійовано! Надішліть його вчителю.');
+    return;
+  }
+
+  if(a === 'importRes'){
+    var rcInp = document.getElementById('resCodeInp');
+    if(rcInp) importResultCode(rcInp.value);
+    return;
+  }
+
+  if(a === 'exportCsv'){
+    var rows = [['Учень', 'Тест', 'Набрано балів', 'Макс. балів', 'Відсоток', 'Оцінка (12)', 'Дата']];
+    var list = resFilterTest === 'ALL' ? allResults : allResults.filter(function(r){ return r.testTitle === resFilterTest; });
+    list.forEach(function(r){
+      var pct = r.total ? Math.round((r.score / r.total) * 100) : 0;
+      var m12 = Math.max(1, Math.round((r.score / (r.total || 1)) * 12));
+      rows.push([r.studentName, r.testTitle, r.score, r.total, pct + '%', m12, r.submittedAt]);
+    });
+    var csv = '\uFEFF' + rows.map(function(row){
+      return row.map(function(cell){ return '"' + String(cell).replace(/"/g, '""') + '"'; }).join(';');
+    }).join('\n');
+    var blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+    var url = URL.createObjectURL(blob);
+    var aEl = document.createElement('a');
+    aEl.href = url;
+    aEl.download = 'rezultaty_testiv.csv';
+    document.body.appendChild(aEl);
+    aEl.click();
+    document.body.removeChild(aEl);
+    URL.revokeObjectURL(url);
+    return;
+  }
+});
+
+loadStorage();
+checkUrlHash();
+render();
+</script>
+</body>
+</html>
